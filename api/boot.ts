@@ -22,6 +22,16 @@ app.all("/api/*", (c) => c.json({ error: "Not Found" }, 404));
 
 export default app;
 
+// Vercel Serverless Functions handler
+import { handle } from "hono/vercel";
+const handler = handle(app);
+export const GET = handler;
+export const POST = handler;
+export const PUT = handler;
+export const PATCH = handler;
+export const DELETE = handler;
+export const OPTIONS = handler;
+
 if (env.isProduction) {
   const { serve } = await import("@hono/node-server");
   const { serveStaticFiles } = await import("./lib/vite.js");
