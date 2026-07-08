@@ -7,17 +7,21 @@ import path from "path";
 type App = Hono<{ Bindings: HttpBindings }>;
 
 export function serveStaticFiles(app: App) {
-  const distPath = path.resolve(import.meta.dirname, "../dist/public");
-
+  // Serve everything inside dist/public as static files
   app.use("*", serveStatic({ root: "./dist/public" }));
 
-  app.notFound((c) => {
+  // Fallback for SPA routing: serve index.html for all other GET requests
+  app.get("*", (c) => {
     const accept = c.req.header("accept") ?? "";
-    if (!accept.includes("text/html")) {
-      return c.json({ error: "Not Found" }, 404);
+    if (accept.includes("text/html")) {
+      try {
+        const indexPath = path.join(process.cwd(), "dist/public/index.html");
+        const content = fs.readFileSync(indexPath, "utf-8");
+        return c.html(content);
+      } catch (err) {
+        console.error("Failed to serve index.html:", err);
+      }
     }
-    const indexPath = path.resolve(distPath, "index.html");
-    const content = fs.readFileSync(indexPath, "utf-8");
-    return c.html(content);
+    return c.json({ error: "Not Found" }, 404);
   });
 }
