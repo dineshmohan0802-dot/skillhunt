@@ -17,7 +17,8 @@ export default function ProjectsPage() {
 
   const { data: activeEvent } = trpc.event.active.useQuery();
   const { data: projects, isLoading } = trpc.project.list.useQuery(
-    activeEvent ? { eventId: activeEvent.id } : undefined,
+    { eventId: activeEvent?.id ?? 0 },
+    { enabled: !!activeEvent },
   );
   const { data: categories } = trpc.project.categories.useQuery(
     { eventId: activeEvent?.id ?? 0 },
